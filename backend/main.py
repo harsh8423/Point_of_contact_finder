@@ -1,5 +1,11 @@
 from contextlib import asynccontextmanager
 import os
+from dotenv import load_dotenv
+
+# Load .env before anything else reads os.getenv()
+# On Render/production, real env vars override .env values (dotenv default)
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError

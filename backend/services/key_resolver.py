@@ -1,7 +1,10 @@
 """
 Shared helper to resolve API keys.
-Priority: SQLite settings table → .env / environment variables.
-This lets users configure keys via the Settings UI without restarting the server.
+Priority: .env / environment variables → Settings DB table.
+
+Environment variables are the source of truth. The DB settings table
+is only used as a fallback for keys entered via the Settings UI that
+are NOT already defined in the environment.
 """
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,10 +13,16 @@ from sqlalchemy import select
 
 async def get_api_key(db: AsyncSession, key_name: str, env_fallback: str) -> str:
     """
-    Look up key_name in the settings table first.
-    Falls back to the environment variable named env_fallback.
+    1. Check environment variable (set via .env / Render env vars) — safest.
+    2. Fall back to the Settings DB table (entered via Settings UI).
     Returns empty string if neither is set.
     """
+    # 1. Environment variable takes priority — never touches DB for this
+    env_val = os.getenv(env_fallback, "") or os.getenv(key_name, "")
+    if env_val and not env_val.startswith("your_"):
+        return env_val
+
+    # 2. Fallback: DB settings table (for keys added via the UI)
     try:
         from models import Settings
         result = await db.execute(select(Settings).where(Settings.key == key_name))
@@ -22,4 +31,5 @@ async def get_api_key(db: AsyncSession, key_name: str, env_fallback: str) -> str
             return row.value
     except Exception:
         pass
-    return os.getenv(env_fallback, "")
+
+    return ""
