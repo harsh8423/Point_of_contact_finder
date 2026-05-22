@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: poc-finder-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # set manually in Render dashboard from Neon
+      - key: SECRET_KEY
+        generateValue: true  # Render auto-generates a random value
+    healthCheckPath: /health
