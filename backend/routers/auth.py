@@ -73,7 +73,8 @@ def _set_cookie(response: Response, token: str) -> None:
         key="poc_token",
         value=token,
         httponly=True,
-        samesite="lax",
+        samesite="none",
+        secure=True,
         max_age=ACCESS_TOKEN_DAYS * 86400,
         path="/",
     )
@@ -145,7 +146,7 @@ async def login(req: LoginRequest, response: Response, db: AsyncSession = Depend
 
 @router.post("/logout")
 async def logout(response: Response):
-    response.delete_cookie("poc_token", path="/")
+    response.delete_cookie("poc_token", path="/", samesite="none", secure=True)
     return {"message": "Logged out"}
 
 
