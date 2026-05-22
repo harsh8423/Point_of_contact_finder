@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface UsageItem { used: number; limit: number; }
 interface Usage { searches: UsageItem; poc: UsageItem; qualify: UsageItem; }
@@ -49,6 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const pathname = usePathname();
+
   const refreshMe = useCallback(async () => {
     try {
       const data = await apiFetch("/api/auth/me");
@@ -63,6 +65,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshMe().finally(() => setLoading(false));
   }, [refreshMe]);
+
+  useEffect(() => {
+    if (!loading) {
+      const isPublic = pathname.startsWith("/login") || pathname.startsWith("/signup");
+      if (!user && !isPublic) {
+        router.push("/login");
+      } else if (user && isPublic) {
+        router.push("/");
+      }
+    }
+  }, [user, loading, pathname, router]);
 
   const login = async (email: string, password: string) => {
     const data = await apiFetch("/api/auth/login", {
