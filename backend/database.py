@@ -23,6 +23,8 @@ _is_sqlite = DATABASE_URL.startswith("sqlite")
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
+    pool_pre_ping=True,
+    pool_recycle=300,
     # SQLite needs check_same_thread=False; PostgreSQL doesn't support it
     **({} if not _is_sqlite else {"connect_args": {"check_same_thread": False}}),
 )
