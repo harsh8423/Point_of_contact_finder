@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"  # Mapping to 8001 locally to avoid conflict with running uvicorn
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Pass the backend's mapped port (8001) so the frontend browser code knows where to hit the API
+        NEXT_PUBLIC_API_URL: "http://localhost:8001"
+    ports:
+      - "3001:3000"  # Mapping to 3001 locally to avoid conflict with running npm run dev
+    depends_on:
+      api:
+        condition: service_healthy
