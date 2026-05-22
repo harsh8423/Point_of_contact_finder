@@ -13,6 +13,8 @@ if _raw_url:
     DATABASE_URL = _raw_url.replace("postgres://", "postgresql+asyncpg://", 1)
     if not DATABASE_URL.startswith("postgresql+asyncpg"):
         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # asyncpg uses 'ssl=' instead of 'sslmode='
+    DATABASE_URL = DATABASE_URL.replace("sslmode=", "ssl=")
 else:
     DATABASE_URL = f"sqlite+aiosqlite:///{os.path.join(BASE_DIR, 'poc_finder.db')}"
 

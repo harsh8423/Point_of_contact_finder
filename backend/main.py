@@ -42,7 +42,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 # Allow localhost + any deployed Vercel frontend URL
 _extra_origin = os.environ.get("FRONTEND_URL", "").rstrip("/")
-_origins = ["http://localhost:3000","https://point-of-contact-finder.vercel.app"]
+_origins = ["http://localhost:3000","http://localhost:3001","https://point-of-contact-finder.vercel.app"]
 if _extra_origin:
     _origins.append(_extra_origin)
 
